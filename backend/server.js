@@ -10,7 +10,12 @@ const {
   waitUntilTableExists,
 } = require("@aws-sdk/client-dynamodb")
 const { DynamoDBDocumentClient, PutCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb")
-// const { Decimal } = require("decimal.js") // Ya no necesitamos importar decimal.js aquí
+
+// --- Nuevas importaciones para Swagger ---
+const swaggerUi = require("swagger-ui-express")
+const YAML = require("yamljs")
+const path = require("path") // Necesario para resolver la ruta del archivo swagger.yaml
+// ----------------------------------------
 
 const app = express()
 const BACKEND_PORT = process.env.BACKEND_PORT || 3001 // Puerto para el backend
@@ -36,6 +41,12 @@ app.use(
 
 // Middleware para parsear JSON en las solicitudes
 app.use(express.json())
+
+// --- Carga el archivo Swagger YAML y configura la ruta para la documentación ---
+const swaggerDocument = YAML.load(path.join(__dirname, "swagger.yaml"))
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+console.log(`Documentación de Swagger disponible en http://localhost:${BACKEND_PORT}/api-docs`)
+// -----------------------------------------------------------------------------
 
 /**
  * Verifica si la tabla de DynamoDB existe y la crea si no.
@@ -88,10 +99,7 @@ app.post("/api/items", async (req, res) => {
       return res.status(400).json({ error: "Missing 'id' in the request body. DynamoDB requires a primary key." })
     }
 
-    // --- ELIMINAMOS LA CONVERSIÓN MANUAL A DECIMAL AQUÍ ---
-    // El DynamoDBDocumentClient maneja los números de JavaScript automáticamente.
     const processedItem = itemData
-    // -----------------------------------------------------
 
     if (!(await checkAndCreateTable(DYNAMODB_TABLE_NAME, client))) {
       return res.status(500).json({ error: "Failed to ensure DynamoDB table exists." })

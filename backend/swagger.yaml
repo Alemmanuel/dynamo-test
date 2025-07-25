@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: API de Backend para DynamoDB
+  version: 1.0.0
+  description: API para interactuar con AWS DynamoDB, permitiendo enviar y leer ítems.
+servers:
+  - url: http://localhost:3001
+    description: Servidor de desarrollo local
+paths:
+  /api/items:
+    post:
+      summary: Envía un nuevo ítem a DynamoDB
+      description: Este endpoint permite enviar un nuevo ítem (producto) a la tabla 'dynamo-test' en DynamoDB.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+            examples:
+              newItem:
+                summary: Ejemplo de un nuevo ítem
+                value:
+                  id: "item-ejemplo-123"
+                  nombre: "Laptop Ultraligera"
+                  descripcion: "Una laptop potente y portátil."
+                  precio: 1200.00
+                  cantidad: 10
+                  fecha: "2023-10-27T10:30:00.000Z"
+      responses:
+        '200':
+          description: Datos enviados exitosamente a DynamoDB
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Item'
+                  response:
+                    type: object
+                    description: Respuesta detallada de DynamoDB
+        '400':
+          description: Error de validación (ej. falta el ID)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Error interno del servidor al enviar datos a DynamoDB
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+    get:
+      summary: Recupera todos los ítems de DynamoDB
+      description: Este endpoint permite obtener todos los ítems almacenados en la tabla 'dynamo-test' de DynamoDB.
+      responses:
+        '200':
+          description: Datos recuperados exitosamente de DynamoDB
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+                  count:
+                    type: integer
+                    description: Número total de ítems recuperados
+        '500':
+          description: Error interno del servidor al leer datos de DynamoDB
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+
+components:
+  schemas:
+    Item:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Identificador único del ítem.
+          example: "item-unique-id-123"
+        nombre:
+          type: string
+          description: Nombre o título del ítem.
+          example: "Producto de Prueba"
+        descripcion:
+          type: string
+          description: Una descripción detallada del ítem.
+          example: "Este es un ítem de ejemplo para la demostración de DynamoDB."
+        precio:
+          type: number
+          format: float
+          description: El precio del ítem.
+          example: 99.99
+        cantidad:
+          type: integer
+          description: La cantidad disponible del ítem.
+          example: 50
+        fecha:
+          type: string
+          format: date-time
+          description: La fecha y hora de creación o última modificación del ítem en formato ISO 8601.
+          example: "2023-10-27T10:00:00.000Z"
