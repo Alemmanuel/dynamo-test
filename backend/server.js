@@ -136,3 +136,4 @@ app.listen(BACKEND_PORT, () => {
   console.log(`Backend Express escuchando en http://localhost:${BACKEND_PORT}`)
   console.log(`Permitiendo solicitudes desde el frontend en: ${FRONTEND_ORIGIN}`)
 })
+/*Fin del código*/
